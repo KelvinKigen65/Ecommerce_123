@@ -1,99 +1,139 @@
 /**
- * Cart Context for managing shopping cart state globally.
- * Uses React Context API to share cart data across components.
+ * Authentication Context for managing user state globally.
+ * Handles login, logout, registration, and token management.
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const CartContext = createContext();
+const AuthContext = createContext();
 
-export const useCart = () => {
-  const context = useContext(CartContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load cart from memory on mount
+  // API base URL
+  const API_URL = 'http://localhost:8000/api/auth';
+
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCartItems(savedCart);
+    checkAuth();
   }, []);
 
-  // Save cart to memory whenever it changes
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  // Add item to cart
-  const addToCart = (product, quantity = 1) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        // Update quantity if item exists
-        toast.success('Cart updated!');
-        return prevItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        // Add new item
-        toast.success('Added to cart!');
-        return [...prevItems, { ...product, quantity }];
+  // Check if user is authenticated
+  const checkAuth = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      try {
+        const response = await axios.get(`${API_URL}/user/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(response.data);
+      } catch (error) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       }
-    });
-  };
-
-  // Remove item from cart
-  const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-    toast.success('Removed from cart');
-  };
-
-  // Update item quantity
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
     }
-    
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
-    );
+    setLoading(false);
   };
 
-  // Clear entire cart
-  const clearCart = () => {
-    setCartItems([]);
-    toast.success('Cart cleared');
+  // Register new user
+  const register = async (userData) => {
+    try {
+      const response = await axios.post(`${API_URL}/register/`, userData);
+      toast.success(response.data.message);
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.username?.[0] || 
+                       error.response?.data?.email?.[0] || 
+                       'Registration failed';
+      toast.error(errorMsg);
+      return { success: false, error: error.response?.data };
+    }
   };
 
-  // Calculate totals
-  const cartTotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  // Login user
+  const login = async (credentials) => {
+    try {
+      const response = await axios.post(`${API_URL}/login/`, credentials);
+      const { access, refresh, user: userData } = response.data;
+      
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
+      setUser(userData);
+      
+      toast.success('Login successful!');
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Login failed';
+      toast.error(errorMsg);
+      return { success: false };
+    }
+  };
 
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+  // Logout user
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    toast.success('Logged out successfully');
+  };
+
+  // Update user profile
+  const updateProfile = async (profileData) => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      const response = await axios.patch(`${API_URL}/profile/`, profileData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(response.data);
+      toast.success('Profile updated successfully');
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.email?.[0] || 
+                       error.response?.data?.username?.[0] || 
+                       'Update failed';
+      toast.error(errorMsg);
+      return { success: false, error: error.response?.data };
+    }
+  };
+
+  // Change password
+  const changePassword = async (passwordData) => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      await axios.post(`${API_URL}/change-password/`, passwordData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Password changed successfully');
+      return { success: true };
+    } catch (error) {
+      const errorMsg = error.response?.data?.old_password?.[0] || 
+                       error.response?.data?.new_password?.[0] || 
+                       'Password change failed';
+      toast.error(errorMsg);
+      return { success: false, error: error.response?.data };
+    }
+  };
 
   const value = {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    cartTotal,
-    cartCount,
+    user,
+    loading,
+    register,
+    login,
+    logout,
+    updateProfile,
+    changePassword,
+    isAuthenticated: !!user,
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
