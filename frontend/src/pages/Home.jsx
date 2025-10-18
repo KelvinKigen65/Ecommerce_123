@@ -52,7 +52,7 @@ const Home = () => {
             <div className="text-center lg:text-left space-y-8 animate-fade-in">
               <div className="inline-block">
                 <span className="bg-primary-500 bg-opacity-50 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold">
-                  🎉 New Arrivals Available
+                   New Arrivals Available
                 </span>
               </div>
               
@@ -311,9 +311,9 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: 'Sarah Johnson', review: 'Amazing quality and fast shipping! Will definitely order again.', rating: 5 },
-              { name: 'Mike Chen', review: 'Great customer service and fantastic products. Highly recommended!', rating: 5 },
-              { name: 'Emily Davis', review: 'Best online shopping experience ever. Love the variety!', rating: 5 },
+              { name: 'Kelvin Kigen', review: 'Amazing quality and fast shipping! Will definitely order again.', rating: 5 },
+              { name: 'Mercy Cheps', review: 'Great customer service and fantastic products. Highly recommended!', rating: 5 },
+              { name: 'Daniel Njoroge', review: 'Best online shopping experience ever. Love the variety!', rating: 5 },
             ].map((testimonial, index) => (
               <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition">
                 <div className="flex mb-4">
