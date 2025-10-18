@@ -1,21 +1,32 @@
+"""
+Order and payment views.
+Handles order creation and Stripe payment processing.
+"""
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.conf import settings
 import stripe
 
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderCreateSerializer
+from products.models import Product
 
+# Configure Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 class OrderViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for orders
+    """
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        """Return orders for the current user"""
         return Order.objects.filter(user=self.request.user)
     
     def get_serializer_class(self):
@@ -24,15 +35,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         return OrderSerializer
     
     def create(self, request, *args, **kwargs):
+        """Create a new order"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        # Calculate totals
         items = serializer.validated_data.pop('items')
         subtotal = sum(item['product'].price * item['quantity'] for item in items)
         
         shipping_cost = 0 if subtotal >= 50 else 10
-        tax_amount = subtotal * 0.1
+        tax_amount = subtotal * 0.1  # 10% tax
+        total = subtotal + shipping_cost + tax_amount
         
+        # Create order
         order = Order.objects.create(
             user=request.user,
             total_price=subtotal,
@@ -41,6 +56,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             **serializer.validated_data
         )
         
+        # Create order items
         for item in items:
             OrderItem.objects.create(
                 order=order,
@@ -50,6 +66,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 quantity=item['quantity']
             )
             
+            # Update product stock
             product = item['product']
             product.stock -= item['quantity']
             product.save()
@@ -61,10 +78,16 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'])
     def create_payment_intent(self, request):
+        """
+        Create Stripe payment intent for checkout
+        POST /api/orders/create_payment_intent/
+        """
         try:
-            amount = request.data.get('amount')
+            amount = request.data.get('amount')  # Amount in dollars
+            
+            # Create a PaymentIntent with Stripe
             intent = stripe.PaymentIntent.create(
-                amount=int(float(amount) * 100),
+                amount=int(float(amount) * 100),  # Convert to cents
                 currency='usd',
                 metadata={
                     'user_id': request.user.id,
@@ -84,10 +107,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def confirm_payment(self, request, pk=None):
+        """
+        Confirm payment for an order
+        POST /api/orders/{id}/confirm_payment/
+        """
         order = self.get_object()
         payment_intent_id = request.data.get('payment_intent_id')
         
         try:
+            # Retrieve the payment intent from Stripe
             intent = stripe.PaymentIntent.retrieve(payment_intent_id)
             
             if intent['status'] == 'succeeded':

@@ -28,7 +28,7 @@ const Header = () => {
       <div className="bg-primary-600 text-white text-sm py-2">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <p>Free shipping on orders over $50!</p>
-          <p>Customer Support: +1 (555) 123-4567</p>
+          <p>Customer Support: +254-724-219-185</p>
         </div>
       </div>
 
@@ -36,8 +36,8 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-primary-600">
-            ShopHub
+          <Link to="/" className="text-2xl font-bold text-red-400d">
+            HuslersShop
           </Link>
 
           {/* Search Bar - Desktop */}

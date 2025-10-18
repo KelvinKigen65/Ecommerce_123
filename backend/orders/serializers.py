@@ -1,9 +1,16 @@
+"""
+Order serializers for API responses.
+"""
 
 from rest_framework import serializers
 from .models import Order, OrderItem
 from products.models import Product
 
+
 class OrderItemSerializer(serializers.ModelSerializer):
+    """
+    Serializer for order items
+    """
     product_image = serializers.SerializerMethodField()
     
     class Meta:
@@ -17,7 +24,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.product.image.url)
         return None
 
+
 class OrderSerializer(serializers.ModelSerializer):
+    """
+    Serializer for order details
+    """
     items = OrderItemSerializer(many=True, read_only=True)
     grand_total = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     
@@ -32,7 +43,11 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'payment_status']
 
+
 class OrderItemCreateSerializer(serializers.Serializer):
+    """
+    Serializer for creating order items
+    """
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value=1)
     
@@ -59,7 +74,11 @@ class OrderItemCreateSerializer(serializers.Serializer):
             'quantity': quantity
         }
 
+
 class OrderCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating orders
+    """
     items = OrderItemCreateSerializer(many=True, write_only=True)
     
     class Meta:
