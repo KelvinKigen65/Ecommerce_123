@@ -66,3 +66,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'stock', 'available', 'featured', 'discount_percentage', 
             'is_in_stock', 'created_at', 'updated_at'
         ]
+        
+class ProductSerializer(serializers.ModelSerializer):
+    """
+    Minimal serializer for embedding product info in cart items
+    """
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'image', 'slug']
