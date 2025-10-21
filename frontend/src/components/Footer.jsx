@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div>
-            <h3 className="text-white text-lg font-bold mb-4">ShopHub</h3>
+            <h3 className="text-white text-lg font-bold mb-4">HuslersShop</h3>
             <p className="text-sm leading-relaxed">
               Your one-stop destination for quality products at amazing prices. 
               We deliver happiness to your doorstep.
@@ -127,7 +127,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} ShopHub. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} HuslersShop. All rights reserved.</p>
         </div>
       </div>
     </footer>

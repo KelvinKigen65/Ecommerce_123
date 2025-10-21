@@ -1,16 +1,26 @@
 /**
- * Header component with navigation, search, and cart.
+ * Header component with navigation, search, cart, and user account dropdown.
  * Beautiful and responsive design with Tailwind CSS.
  */
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSearch, FiShoppingCart, FiMenu, FiX } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiShoppingCart,
+  FiMenu,
+  FiX,
+  FiUser,
+  FiLogOut,
+} from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { useUser } from '../context/UserContext';
 
 const Header = () => {
   const { cartCount } = useCart();
+  const { user, logout } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
@@ -20,6 +30,11 @@ const Header = () => {
       navigate(`/search?q=${searchQuery}`);
       setSearchQuery('');
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -36,12 +51,15 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-red-400d">
+          <Link to="/" className="text-2xl font-bold text-red-400">
             HuslersShop
           </Link>
 
           {/* Search Bar - Desktop */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-8">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-xl mx-8"
+          >
             <div className="relative w-full">
               <input
                 type="text"
@@ -60,7 +78,8 @@ const Header = () => {
           </form>
 
           {/* Right Icons */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-6 relative">
+            {/* Cart */}
             <Link
               to="/cart"
               className="relative hover:text-primary-600 transition"
@@ -72,6 +91,55 @@ const Header = () => {
                 </span>
               )}
             </Link>
+
+            {/* Account Icon */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="hover:text-primary-600 transition"
+              >
+                <FiUser size={24} />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 shadow-lg rounded-lg">
+                  {user ? (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        My Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-100 text-red-500"
+                      >
+                        <FiLogOut size={16} /> Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -88,16 +156,28 @@ const Header = () => {
           <Link to="/" className="hover:text-primary-600 transition font-medium">
             Home
           </Link>
-          <Link to="/products" className="hover:text-primary-600 transition font-medium">
+          <Link
+            to="/products"
+            className="hover:text-primary-600 transition font-medium"
+          >
             All Products
           </Link>
-          <Link to="/categories" className="hover:text-primary-600 transition font-medium">
+          <Link
+            to="/categories"
+            className="hover:text-primary-600 transition font-medium"
+          >
             Categories
           </Link>
-          <Link to="/about" className="hover:text-primary-600 transition font-medium">
+          <Link
+            to="/about"
+            className="hover:text-primary-600 transition font-medium"
+          >
             About
           </Link>
-          <Link to="/contact" className="hover:text-primary-600 transition font-medium">
+          <Link
+            to="/contact"
+            className="hover:text-primary-600 transition font-medium"
+          >
             Contact
           </Link>
         </nav>
