@@ -1,0 +1,10 @@
+{
+  "name": "ecommerce-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  }
+}
