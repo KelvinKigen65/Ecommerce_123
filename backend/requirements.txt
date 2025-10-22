@@ -2,7 +2,7 @@ asgiref==3.10.0
 certifi==2025.10.5
 charset-normalizer==3.4.4
 dj-database-url==3.0.1
-Django==4.2.7
+//Django==4.2.7
 django-cors-headers==4.3.0
 django-filter==23.5
 djangorestframework==3.14.0
@@ -23,3 +23,6 @@ stripe==7.7.0
 typing_extensions==4.15.0
 urllib3==2.5.0
 whitenoise==6.11.0
+Django>=5.0,<6.0
+gunicorn
+
