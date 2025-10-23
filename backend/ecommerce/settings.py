@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import dj_database_url
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,6 +28,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -34,14 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party apps
     'rest_framework',
     'corsheaders',
 
+    # Your Django apps
     'products',
     'cart',
     'orders',
     'users',
-
 ]
 
 
