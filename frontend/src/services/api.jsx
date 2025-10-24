@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 // Change this if your Django server runs on another port
-const API_BASE_URL = 'https://ecommerce-123-ouy4.onrender.com/api/api';
+const API_BASE_URL = 'https://ecommerce-123-ouy4.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
