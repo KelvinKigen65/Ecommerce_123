@@ -25,7 +25,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'DJANGO_SECRET_KEY'
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','ecommerce-123-ouy4.onrender.com']
 
 
 
@@ -137,9 +136,16 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'ecommerce-123-ouy4.onrender.com',
+    'ecommerce-123.vercel.app'
+]
+
 CORS_ALLOWED_ORIGINS = [
-    "ecommerce-123.vercel.app",
-    "http://localhost:5173"
+    "https://ecommerce-123.vercel.app",  
+    "http://localhost:5173",           
 ]
 CORS_ALLOW_CREDENTIALS = True
 
