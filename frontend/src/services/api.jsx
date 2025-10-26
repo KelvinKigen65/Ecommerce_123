@@ -5,7 +5,7 @@
 
 import axios from 'axios';
 
-// Change this if your Django server runs on another port
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://ecommerce-123-ouy4.onrender.com/api";
 
 
@@ -17,9 +17,8 @@ const api = axios.create({
   },
 });
 
-// ==============================
-// PRODUCTS API
-// ==============================
+// products API
+
 export const productsAPI = {
   // Get all products with optional filters
   getAll: (params = {}) => api.get('/products/', { params }),
@@ -41,17 +40,14 @@ export const productsAPI = {
   search: (query) => api.get('/products/', { params: { search: query } }),
 };
 
-// ==============================
-// CATEGORIES API
-// ==============================
+// categories API
+
 export const categoriesAPI = {
   getAll: () => api.get('/categories/'),
   getBySlug: (slug) => api.get(`/categories/${slug}/`),
 };
 
-// ==============================
-// CART API
-// ==============================
+// cart API
 export const cartAPI = {
   getCart: (sessionId) => api.get('/cart/', { params: { session_id: sessionId } }),
   addItem: (productId, quantity = 1) =>
@@ -62,9 +58,9 @@ export const cartAPI = {
   clearCart: () => api.delete('/cart/clear/'),
 };
 
-// ==============================
-// ORDERS API
-// ==============================
+
+// orders API
+
 export const ordersAPI = {
   create: (orderData) => api.post('/orders/', orderData),
   getById: (orderId) => api.get(`/orders/${orderId}/`),
