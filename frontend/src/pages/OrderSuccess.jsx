@@ -1,7 +1,6 @@
 /**
  * Order Success Page - Confirmation after successful order.
- * Displays order details and confirmation message.
- */
+
 
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';

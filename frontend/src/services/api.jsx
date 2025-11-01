@@ -17,7 +17,7 @@ const api = axios.create({
   },
 });
 
-// products API
+// products_API
 
 export const productsAPI = {
   // Get all products with optional filters
@@ -26,7 +26,7 @@ export const productsAPI = {
   // Get single product by slug
   getBySlug: (slug) => api.get(`/products/${slug}/`),
 
-  // Get featured products
+  // Get featured produc
   getFeatured: () => api.get('/products/featured/'),
 
   // Get latest products
