@@ -1,6 +1,3 @@
-/**
- * Home Page - Modern, attractive landing page with animations
- */
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
