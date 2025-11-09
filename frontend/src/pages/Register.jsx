@@ -1,6 +1,6 @@
 /**
  * Register Page - User registration form.
- * Collects user information for creating a new account.
+ * Collects user information  creating a new account.
  */
 
 import React, { useState } from 'react';

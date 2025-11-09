@@ -1,6 +1,6 @@
 /**
  * Product Detail Page - Detailed view of a single product.
- * Includes image gallery, description, and add to cart functionality.
+ 
  */
 
 import React, { useState, useEffect } from 'react';
