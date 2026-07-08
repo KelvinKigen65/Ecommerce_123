@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiTruck, FiCreditCard, FiRefreshCw, FiStar } from 'react-icons/fi';
 import { productsAPI, categoriesAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
+import { FREE_SHIPPING_THRESHOLD, formatCurrency } from '../utils/currency';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -131,7 +132,7 @@ const Home = () => {
                 <FiTruck className="text-white" size={28} />
               </div>
               <h3 className="font-bold text-lg mb-2">Free Shipping</h3>
-              <p className="text-gray-600 text-sm">On orders over $50</p>
+              <p className="text-gray-600 text-sm">On orders over {formatCurrency(FREE_SHIPPING_THRESHOLD)}</p>
             </div>
 
             <div className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-gray-50 transition group">

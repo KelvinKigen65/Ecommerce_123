@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
+import { FREE_SHIPPING_THRESHOLD, formatCurrency } from '../utils/currency';
 
 const Header = () => {
   const { cartCount } = useCart();
@@ -42,7 +43,7 @@ const Header = () => {
       {/* Top Bar */}
       <div className="bg-primary-600 text-white text-sm py-2">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <p>Free shipping on orders over $50!</p>
+          <p>Free shipping on orders over {formatCurrency(FREE_SHIPPING_THRESHOLD)}!</p>
           <p>Customer Support: +254-724-219-185</p>
         </div>
       </div>

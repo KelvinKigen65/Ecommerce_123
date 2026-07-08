@@ -24,6 +24,7 @@ import Register from './pages/Register';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import Profile from './pages/Profile';
+import About from './pages/About';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/order-success/:orderId" element={<OrderSuccess />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/search" element={<Products />} />
+                  <Route path="/about" element={<About />} />
                 </Routes>
               </main>
 

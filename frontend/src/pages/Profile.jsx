@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiUser, FiPackage, FiSettings } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { ordersAPI } from '../services/api';
+import { formatCurrency } from '../utils/currency';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -30,10 +31,7 @@ const Profile = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get('http://localhost:8000/api/orders/', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await ordersAPI.list();
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -206,7 +204,7 @@ const Profile = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-primary-600">${order.grand_total}</p>
+                            <p className="font-semibold text-primary-600">{formatCurrency(order.grand_total)}</p>
                             <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mt-1 ${getStatusColor(order.status)}`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </span>

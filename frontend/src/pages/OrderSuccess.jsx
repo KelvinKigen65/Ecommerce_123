@@ -5,7 +5,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FiCheckCircle, FiPackage } from 'react-icons/fi';
-import axios from 'axios';
+import { ordersAPI } from '../services/api';
+import { formatCurrency } from '../utils/currency';
 
 const OrderSuccess = () => {
   const { orderId } = useParams();
@@ -18,11 +19,7 @@ const OrderSuccess = () => {
 
   const fetchOrder = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(
-        `http://localhost:8000/api/orders/${orderId}/`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await ordersAPI.getById(orderId);
       setOrder(response.data);
     } catch (error) {
       console.error('Error fetching order:', error);
@@ -93,10 +90,10 @@ const OrderSuccess = () => {
                   <div className="flex-1 ml-4">
                     <p className="font-semibold">{item.product_name}</p>
                     <p className="text-sm text-gray-500">
-                      Quantity: {item.quantity} × ${item.price}
+                      Quantity: {item.quantity} x {formatCurrency(item.price)}
                     </p>
                   </div>
-                  <p className="font-bold">${item.subtotal}</p>
+                  <p className="font-semibold text-sm">{formatCurrency(item.subtotal)}</p>
                 </div>
               ))}
             </div>
@@ -105,22 +102,22 @@ const OrderSuccess = () => {
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-semibold">${order.total_price}</span>
+                <span className="font-semibold">{formatCurrency(order.total_price)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
                 <span className="font-semibold">
-                  {order.shipping_cost === '0.00' ? 'FREE' : `$${order.shipping_cost}`}
+                  {Number(order.shipping_cost) === 0 ? 'FREE' : formatCurrency(order.shipping_cost)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax</span>
-                <span className="font-semibold">${order.tax_amount}</span>
+                <span className="font-semibold">{formatCurrency(order.tax_amount)}</span>
               </div>
               <div className="border-t pt-2 flex justify-between text-xl">
                 <span className="font-bold">Total</span>
-                <span className="font-bold text-primary-600">
-                  ${order.grand_total}
+                <span className="font-semibold text-primary-600">
+                  {formatCurrency(order.grand_total)}
                 </span>
               </div>
             </div>
@@ -172,6 +169,16 @@ const OrderSuccess = () => {
                 Payment: {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
               </div>
             </div>
+            {order.payment_method === 'mpesa' && order.payment_status === 'pending' && (
+              <p className="text-sm text-gray-600 mt-4">
+                Check your phone for the M-Pesa prompt and enter your PIN to complete payment.
+              </p>
+            )}
+            {order.mpesa_receipt_number && (
+              <p className="text-sm text-gray-600 mt-4">
+                M-Pesa receipt: <span className="font-semibold">{order.mpesa_receipt_number}</span>
+              </p>
+            )}
           </div>
 
           {/* Action Buttons */}

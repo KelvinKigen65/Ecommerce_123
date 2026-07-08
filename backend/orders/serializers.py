@@ -39,9 +39,15 @@ class OrderSerializer(serializers.ModelSerializer):
             'address', 'city', 'postal_code', 'country',
             'total_price', 'shipping_cost', 'tax_amount', 'grand_total',
             'status', 'payment_status', 'payment_method',
+            'mpesa_checkout_request_id', 'mpesa_receipt_number',
+            'mpesa_result_description',
             'items', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'payment_status']
+        read_only_fields = [
+            'id', 'created_at', 'updated_at', 'payment_status',
+            'mpesa_checkout_request_id', 'mpesa_receipt_number',
+            'mpesa_result_description',
+        ]
 
 
 class OrderItemCreateSerializer(serializers.Serializer):

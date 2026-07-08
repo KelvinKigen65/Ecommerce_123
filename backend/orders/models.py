@@ -51,6 +51,11 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=50, blank=True)
     stripe_payment_intent_id = models.CharField(max_length=200, blank=True, null=True)
+    mpesa_checkout_request_id = models.CharField(max_length=200, blank=True, null=True)
+    mpesa_merchant_request_id = models.CharField(max_length=200, blank=True, null=True)
+    mpesa_receipt_number = models.CharField(max_length=100, blank=True, null=True)
+    mpesa_result_code = models.CharField(max_length=20, blank=True, null=True)
+    mpesa_result_description = models.TextField(blank=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

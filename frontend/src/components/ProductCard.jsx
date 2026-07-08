@@ -7,6 +7,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { formatCurrency } from '../utils/currency';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -19,14 +20,14 @@ const ProductCard = ({ product }) => {
   return (
     <Link
       to={`/product/${product.slug}`}
-      className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2"
+      className="group relative bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden transform hover:-translate-y-1"
     >
       {/* Image Container */}
       <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 aspect-square">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
         {/* Badges */}
@@ -74,19 +75,19 @@ const ProductCard = ({ product }) => {
         </p>
 
         {/* Product Name */}
-        <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-primary-600 transition min-h-[3.5rem]">
+        <h3 className="text-base font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-primary-600 transition min-h-[3rem]">
           {product.name}
         </h3>
 
         {/* Price Section */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-gray-900">
-              ${product.price}
+            <span className="text-lg font-semibold text-gray-900">
+              {formatCurrency(product.price)}
             </span>
             {product.compare_price && (
-              <span className="text-sm text-gray-400 line-through">
-                ${product.compare_price}
+              <span className="text-xs text-gray-400 line-through">
+                {formatCurrency(product.compare_price)}
               </span>
             )}
           </div>
@@ -103,13 +104,13 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           disabled={!product.is_in_stock}
-          className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+          className={`w-full py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
             product.is_in_stock
-              ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-md hover:shadow-xl transform hover:scale-105'
+              ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-md hover:shadow-lg'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
-          <FiShoppingCart size={18} />
+          <FiShoppingCart size={16} />
           <span>{product.is_in_stock ? 'Add to Cart' : 'Unavailable'}</span>
         </button>
       </div>

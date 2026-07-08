@@ -1,24 +1,24 @@
 /**
  * Checkout Page - Order form and payment processing.
- * Integrates with Stripe for secure payments.
+ * Integrates with M-Pesa STK Push for secure payments.
  */
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiCreditCard, FiLock } from 'react-icons/fi';
+import { FiLock, FiSmartphone } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import axios from 'axios';
+import { ordersAPI } from '../services/api';
 import toast from 'react-hot-toast';
-
-const stripePromise = loadStripe('your_stripe_publishable_key_here');
+import {
+  FREE_SHIPPING_THRESHOLD,
+  STANDARD_SHIPPING_COST,
+  TAX_RATE,
+  formatCurrency,
+} from '../utils/currency';
 
 const CheckoutForm = () => {
   const navigate = useNavigate();
-  const stripe = useStripe();
-  const elements = useElements();
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   
@@ -30,12 +30,12 @@ const CheckoutForm = () => {
     address: '',
     city: '',
     postal_code: '',
-    country: 'United States',
+    country: 'Kenya',
   });
   const [loading, setLoading] = useState(false);
 
-  const shippingCost = cartTotal >= 50 ? 0 : 10;
-  const taxAmount = cartTotal * 0.1;
+  const shippingCost = cartTotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const taxAmount = cartTotal * TAX_RATE;
   const grandTotal = cartTotal + shippingCost + taxAmount;
 
   const handleChange = (e) => {
@@ -47,89 +47,38 @@ const CheckoutForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!stripe || !elements) {
+
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
       return;
     }
     
     setLoading(true);
 
     try {
-      // Create payment intent
-      const token = localStorage.getItem('accessToken');
-      const intentResponse = await axios.post(
-        'http://localhost:8000/api/orders/create_payment_intent/',
-        { amount: grandTotal.toFixed(2) },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const orderData = {
+        ...formData,
+        items: cartItems.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
+      };
 
-      const { clientSecret } = intentResponse.data;
-
-      // Confirm card payment
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: {
-            name: `${formData.first_name} ${formData.last_name}`,
-            email: formData.email,
-          },
-        },
+      const orderResponse = await ordersAPI.create(orderData);
+      const mpesaResponse = await ordersAPI.initiateMpesaPayment(orderResponse.data.id, {
+        phone: formData.phone,
       });
 
-      if (error) {
-        toast.error(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (paymentIntent.status === 'succeeded') {
-        // Create order
-        const orderData = {
-          ...formData,
-          items: cartItems.map(item => ({
-            product_id: item.id,
-            quantity: item.quantity
-          }))
-        };
-
-        const orderResponse = await axios.post(
-          'http://localhost:8000/api/orders/',
-          orderData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        // Confirm payment on backend
-        await axios.post(
-          `http://localhost:8000/api/orders/${orderResponse.data.id}/confirm_payment/`,
-          { payment_intent_id: paymentIntent.id },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        toast.success('Order placed successfully!');
-        clearCart();
-        navigate(`/order-success/${orderResponse.data.id}`);
-      }
+      toast.success(mpesaResponse.data.message || 'M-Pesa prompt sent to your phone');
+      clearCart();
+      navigate(`/order-success/${orderResponse.data.id}`);
     } catch (error) {
       console.error('Payment error:', error);
-      toast.error('Payment failed. Please try again.');
+      const errorMessage = error.response?.data?.error || 'M-Pesa payment failed. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
-
-  const cardElementOptions = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770',
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: '#9e2146',
-      },
-    },
   };
 
   return (
@@ -255,30 +204,30 @@ const CheckoutForm = () => {
               {/* Payment Information */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold mb-4 flex items-center">
-                  <FiCreditCard className="mr-2" />
-                  Payment Information
+                  <FiSmartphone className="mr-2" />
+                  M-Pesa Payment
                 </h2>
                 
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2">Card Details</label>
-                  <div className="border border-gray-300 rounded-lg p-3">
-                    <CardElement options={cardElementOptions} />
-                  </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <p className="font-semibold text-green-800 mb-1">Pay with M-Pesa STK Push</p>
+                  <p className="text-sm text-green-700">
+                    We will send a payment prompt to the phone number above. Enter your M-Pesa PIN to complete the order.
+                  </p>
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600">
                   <FiLock className="mr-2" />
-                  <span>Your payment information is secure and encrypted</span>
+                  <span>Your payment is processed securely through Safaricom M-Pesa</span>
                 </div>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={!stripe || loading}
-                className="w-full bg-primary-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-primary-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={loading}
+                className="w-full bg-green-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? 'Processing...' : `Pay $${grandTotal.toFixed(2)}`}
+                {loading ? 'Sending M-Pesa prompt...' : `Pay ${formatCurrency(grandTotal)} with M-Pesa`}
               </button>
             </form>
           </div>
@@ -301,7 +250,7 @@ const CheckoutForm = () => {
                       <p className="font-semibold text-sm">{item.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold text-sm">{formatCurrency(item.price * item.quantity)}</p>
                   </div>
                 ))}
               </div>
@@ -310,22 +259,22 @@ const CheckoutForm = () => {
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold">${cartTotal.toFixed(2)}</span>
+                  <span className="font-semibold">{formatCurrency(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-semibold">
-                    {shippingCost === 0 ? 'FREE' : `${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0 ? 'FREE' : formatCurrency(shippingCost)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax (10%)</span>
-                  <span className="font-semibold">${taxAmount.toFixed(2)}</span>
+                  <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between text-xl">
                   <span className="font-bold">Total</span>
-                  <span className="font-bold text-primary-600">
-                    ${grandTotal.toFixed(2)}
+                  <span className="font-semibold text-primary-600">
+                    {formatCurrency(grandTotal)}
                   </span>
                 </div>
               </div>
@@ -338,11 +287,7 @@ const CheckoutForm = () => {
 };
 
 const Checkout = () => {
-  return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
-    </Elements>
-  );
+  return <CheckoutForm />;
 };
 
 export default Checkout;

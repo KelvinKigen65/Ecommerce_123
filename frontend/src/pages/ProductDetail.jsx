@@ -8,6 +8,7 @@ import { useParams, Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiTruck, FiShield } from 'react-icons/fi';
 import { productsAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
+import { FREE_SHIPPING_THRESHOLD, formatCurrency } from '../utils/currency';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -131,17 +132,17 @@ const ProductDetail = () => {
               <p className="text-sm text-gray-500 mb-2">{product.category.name}</p>
 
               {/* Product Name */}
-              <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+              <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
 
               {/* Price */}
               <div className="flex items-center space-x-4 mb-6">
-                <span className="text-4xl font-bold text-primary-600">
-                  ${product.price}
+                <span className="text-2xl font-semibold text-primary-600">
+                  {formatCurrency(product.price)}
                 </span>
                 {product.compare_price && (
                   <>
-                    <span className="text-2xl text-gray-400 line-through">
-                      ${product.compare_price}
+                    <span className="text-lg text-gray-400 line-through">
+                      {formatCurrency(product.compare_price)}
                     </span>
                     <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                       Save {product.discount_percentage}%
@@ -196,13 +197,13 @@ const ProductDetail = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={!product.is_in_stock}
-                  className={`flex-1 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 transition ${
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition ${
                     product.is_in_stock
                       ? 'bg-primary-600 text-white hover:bg-primary-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  <FiShoppingCart size={20} />
+                  <FiShoppingCart size={18} />
                   <span>Add to Cart</span>
                 </button>
                 <button className="px-6 py-3 border-2 border-gray-300 rounded-lg hover:border-primary-600 transition">
@@ -214,7 +215,7 @@ const ProductDetail = () => {
               <div className="border-t pt-6 space-y-3">
                 <div className="flex items-center space-x-3 text-gray-700">
                   <FiTruck size={20} className="text-primary-600" />
-                  <span>Free shipping on orders over $50</span>
+                  <span>Free shipping on orders over {formatCurrency(FREE_SHIPPING_THRESHOLD)}</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-700">
                   <FiShield size={20} className="text-primary-600" />

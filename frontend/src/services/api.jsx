@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8001/api";
 
 
 
@@ -15,6 +15,14 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // products_API
@@ -62,9 +70,14 @@ export const cartAPI = {
 // orders API
 
 export const ordersAPI = {
+  list: () => api.get('/orders/'),
   create: (orderData) => api.post('/orders/', orderData),
   getById: (orderId) => api.get(`/orders/${orderId}/`),
   getMyOrders: () => api.get('/orders/my-orders/'),
+  initiateMpesaPayment: (orderId, data) =>
+    api.post(`/orders/${orderId}/initiate_mpesa_payment/`, data),
+  checkPaymentStatus: (orderId) =>
+    api.get(`/orders/${orderId}/payment_status_check/`),
 };
 
 export default api;

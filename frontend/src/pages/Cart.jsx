@@ -7,9 +7,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiTrash2, FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import {
+  FREE_SHIPPING_THRESHOLD,
+  STANDARD_SHIPPING_COST,
+  TAX_RATE,
+  formatCurrency,
+} from '../utils/currency';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, cartTotal, clearCart } = useCart();
+  const shippingCost = cartTotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+  const taxAmount = cartTotal * TAX_RATE;
+  const grandTotal = cartTotal + shippingCost + taxAmount;
 
   if (cartItems.length === 0) {
     return (
@@ -60,15 +69,15 @@ const Cart = () => {
                   <div className="flex-1 ml-6">
                     <Link
                       to={`/product/${item.slug}`}
-                      className="text-lg font-semibold hover:text-primary-600 transition"
+                      className="text-base font-semibold hover:text-primary-600 transition"
                     >
                       {item.name}
                     </Link>
                     <p className="text-gray-500 text-sm mt-1">
                       {item.category_name}
                     </p>
-                    <p className="text-primary-600 font-bold text-xl mt-2">
-                      ${item.price}
+                    <p className="text-primary-600 font-semibold text-base mt-2">
+                      {formatCurrency(item.price)}
                     </p>
                   </div>
 
@@ -94,8 +103,8 @@ const Cart = () => {
 
                     {/* Subtotal */}
                     <div className="w-24 text-right">
-                      <p className="font-bold text-lg">
-                        ${(item.price * item.quantity).toFixed(2)}
+                      <p className="font-semibold text-sm">
+                        {formatCurrency(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -130,35 +139,31 @@ const Cart = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold">${cartTotal.toFixed(2)}</span>
+                  <span className="font-semibold">{formatCurrency(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-semibold">
-                    {cartTotal >= 50 ? 'FREE' : '$10.00'}
+                    {shippingCost === 0 ? 'FREE' : formatCurrency(shippingCost)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax (10%)</span>
                   <span className="font-semibold">
-                    ${(cartTotal * 0.1).toFixed(2)}
+                    {formatCurrency(taxAmount)}
                   </span>
                 </div>
                 <div className="border-t pt-4 flex justify-between text-xl">
                   <span className="font-bold">Total</span>
-                  <span className="font-bold text-primary-600">
-                    ${(
-                      cartTotal +
-                      (cartTotal >= 50 ? 0 : 10) +
-                      cartTotal * 0.1
-                    ).toFixed(2)}
+                  <span className="font-semibold text-primary-600">
+                    {formatCurrency(grandTotal)}
                   </span>
                 </div>
               </div>
 
-              {cartTotal < 50 && (
+              {cartTotal < FREE_SHIPPING_THRESHOLD && (
                 <p className="text-sm text-gray-600 mb-6 bg-yellow-50 p-3 rounded-lg">
-                  Add ${(50 - cartTotal).toFixed(2)} more to get free shipping!
+                  Add {formatCurrency(FREE_SHIPPING_THRESHOLD - cartTotal)} more to get free shipping!
                 </p>
               )}
 
